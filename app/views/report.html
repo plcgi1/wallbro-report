@@ -1,0 +1,37 @@
+<div class="" ng-controller="ReportCtrl">
+  
+  <div class="col-md-6 pull-left">
+    <h3>{{campaign_title || '&nbsp;'}}</h3>
+  </div>
+  
+  <div class="pull-right">
+      <div>Select campaign</div>
+      <select class="form-control" ng-model="campaign" ng-options="z.id as z.name for z in campaigns" ng-change="setCampaignTitle()" placeholder="Select campaign name for report"></select>
+      <br/>
+      <a type="button" class="btn btn-success" ng-click="show_edit()"><span class="glyphicon glyphicon-plus"></span> Add</a>
+  </div>
+  <br/><br/>
+  <table class="table table-striped table-bordered">
+    <tr>
+        <th width="40%">Walbro Employees Entertained<div class="text-muted"><small>List names of Walbro employees involved in expense</small></div></th>
+        <th width="10%">Currency of Exp<div class="text-muted"><small>Leave blank if in USD</small></div></th>
+        <th width="10%">"Currency Value/Miles in Personal Car"<div class="text-muted"><small>Enter local currency value or car mileage</small></div></th>
+        <th width="10%">"Exchange Rate/Miles"<div class="text-muted"><small>Enter "1" if USD,exchange rate,or "miles"</small></div></th>
+        <th width="15%">Category for Expenses <div class="text-muted"><small>Select from drop down list </small></div></th>
+        <th width="10%">Expense Amount</th>
+        <th></th>
+    </tr>
+    
+    <tr ng-repeat="item in data track by $index">
+        <td class="col-md-1">{{item.employee}}</td>
+        <td>{{item.currency}}</td>
+        <td>{{item.value}}</td>
+        <td>{{item.rate}}</td>
+        <td>{{item.category_title}}</td>
+        <td ng-bind="calculate(item.value,item.rate) || 0"></td>
+        <td><button type="button" class="btn btn-info" ng-click="show_edit(item)"><span class="glyphicon glyphicon-pencil"></span> edit</button></td>
+    </tr>
+    
+  </table>
+</div>
+<div ng-controller="UploadCtrl"><ng-include src="'views/upload.html'"></ng-include></div>

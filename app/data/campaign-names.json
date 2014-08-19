@@ -1,0 +1,11 @@
+[
+    { "name" : "WEM Headquarters", "id" : "1" },
+    { "name" : "GTG - Global Tech Group", "id" : "2" },
+    { "name" : "WEM Aftermarket", "id" : "3" },
+    { "name" : "WEM Cass city", "id" : "4" },
+    { "name" : "WEM Los Mochis USD", "id" : "5" },
+    { "name" : "WEM Los Mochis Peso", "id" : "6" },
+    { "name" : "WEM China", "id" : "7" },
+    { "name" : "WEM Japan", "id" : "8" },
+    { "name" : "WEM Thailand", "id" : "9" }
+]

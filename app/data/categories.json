@@ -1,0 +1,21 @@
+[
+    { "name" : "Accr warrnaty", "id" : "1" },
+    { "name" : "Advertising expense", "id" : "2" },
+    { "name" : "Building-Equipment Maintenance", "id" : "3" },
+    { "name" : "Computer expense", "id" : "4" },
+    { "name" : "Dues & Subsccriptions", "id" : "5" },
+    { "name" : "Employee relations & Training", "id" : "6" },
+    { "name" : "Freight out expedited", "id" : "7" },
+    { "name" : "Legal & audit", "id" : "8" },
+    { "name" : "Licence & Goverment Fees", "id" : "9" },
+    { "name" : "Meals & Entertaiment", "id" : "10" },
+    { "name" : "Miscellaneous expense", "id" : "11" },
+    { "name" : "Postage expense", "id" : "12" },
+    { "name" : "Reqruitment & Relocation", "id" : "13" },
+    { "name" : "Software expense", "id" : "14" },
+    { "name" : "Supplies expense", "id" : "15" },
+    { "name" : "Telephone & Utility expense", "id" : "16" },
+    { "name" : "Travel expense - Airfare/Hotel", "id" : "17" },
+    { "name" : "Travel expense - Auto", "id" : "18" },
+    { "name" : "Tuition Reimbusement", "id" : "19" }
+]
