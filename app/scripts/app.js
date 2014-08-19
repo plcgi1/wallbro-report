@@ -9,10 +9,9 @@
  * Main module of the application.
  */
 (function() {
-	var a = angular.module('report',
+	window.app = angular.module('report',
 		['ngRoute', 'report.controllers','ui.bootstrap','plcgi.eventbus','angularFileUpload']
 	);
-	window.app = a;
 	window.app.controllers = angular.module('report.controllers', ['ui.bootstrap','plcgi.eventbus','angularFileUpload']);
 
 	window.app.config(function($routeProvider, $httpProvider) {
