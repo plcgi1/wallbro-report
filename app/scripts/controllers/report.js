@@ -8,7 +8,7 @@
 		$scope.row = {};
 		
 		$scope.campaign = {};
-		
+		$scope.total    = 0;
 		// getting data from server about categories
 		$http.get('data/categories.json').success(function(data) {
 			$scope.categories = data;
@@ -21,7 +21,12 @@
 		
 		// calculate value from cells
 		$scope.calculate = function(a,b){
-			return parseFloat(a*b);
+			if( a && b ) {
+			     var res = parseFloat(a*b);
+			     $scope.total = $scope.total + res;
+			     return res;
+			}
+			return 0;
 		};
 		// Generate four random hex digits.
 		function S4() {
