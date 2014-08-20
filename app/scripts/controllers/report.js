@@ -18,12 +18,15 @@
 		$http.get('data/campaign-names.json').success(function(data) {
 			$scope.campaigns = data;
 		});
-		
+		function calc_total(){
+			angular.forEach($scope.data,function(item){
+				$scope.total = $scope.total + item.amount;
+			});
+		}
 		// calculate value from cells
 		$scope.calculate_me = function(a,b){
 			if( a && b ) {
 			     var res = parseFloat(a*b);
-			     $scope.total = parseFloat($scope.total + res);
 			     return res;
 			}
 			return 0;
@@ -105,6 +108,7 @@
 		
 		$scope.show_edit = show_edit;
 		$scope.setCampaignTitle = setCampaignTitle;
+		$scope.calc_total = calc_total;
 		var RowDlgCtrl = function($scope, $modalInstance,row,campaigns,categories) {
 			$scope.row = row;
 			$scope.campaigns = campaigns;
