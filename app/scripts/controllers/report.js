@@ -20,7 +20,7 @@
 		});
 		function calc_total(){
 			angular.forEach($scope.data,function(item){
-				$scope.total = $scope.total + item.amount;
+				$scope.total = parseFloat($scope.total + (item.rate*item.value));
 			});
 		}
 		// calculate value from cells
