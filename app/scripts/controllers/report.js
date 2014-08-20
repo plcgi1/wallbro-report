@@ -8,7 +8,7 @@
 		$scope.row = {};
 		
 		$scope.campaign = {};
-		$scope.total    = 0;
+		
 		// getting data from server about categories
 		$http.get('data/categories.json').success(function(data) {
 			$scope.categories = data;
@@ -18,10 +18,12 @@
 		$http.get('data/campaign-names.json').success(function(data) {
 			$scope.campaigns = data;
 		});
-		function calc_total(){
-			angular.forEach($scope.data,function(item){
-				$scope.total = parseFloat($scope.total + (item.rate*item.value));
+		function calc_total(data){
+			var total = 0;
+			angular.forEach(data,function(item){
+				total = parseFloat(total + (item.rate*item.value));
 			});
+			return total;
 		}
 		// calculate value from cells
 		$scope.calculate_me = function(a,b){
