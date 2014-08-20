@@ -20,10 +20,10 @@
 		});
 		
 		// calculate value from cells
-		$scope.calculate = function(a,b){
+		$scope.calculate_me = function(a,b){
 			if( a && b ) {
 			     var res = parseFloat(a*b);
-			     $scope.total = $scope.total + res;
+			     $scope.total = parseFloat($scope.total + res);
 			     return res;
 			}
 			return 0;
