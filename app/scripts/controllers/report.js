@@ -1,23 +1,37 @@
 (function() {
 	'use strict';
 	var app = window.app;
-	app.controllers.controller('ReportCtrl', function($scope, $http, $modal) {
+	app.controllers.controller('ReportCtrl', function($scope, $http, $modal,$location,$routeParams,EventBus) {
+		$scope.report_id = $routeParams.report_id;
+				
 		// report data array
 		$scope.data = [];
 		// current row for report
 		$scope.row = {};
 		
-		$scope.campaign = {};
-		
+		$scope.companies = [];
+				
 		// getting data from server about categories
-		$http.get('data/categories.json').success(function(data) {
-			$scope.categories = data;
+		$http.get('index.php?action=categories').success(function(data) {
+			$scope.categories  = data;
 		});
 		
 		// getting data from server about campaign names
-		$http.get('data/campaign-names.json').success(function(data) {
-			$scope.campaigns = data;
+		$http.get('index.php?action=companies').success(function(data) {
+			$scope.companies = data;
 		});
+		
+		if ( $scope.report_id ) {
+			$http.get('index.php?action=get_report&id='+$scope.report_id).success(function(data) {
+				$scope.data = data.rows;
+				$scope.report_id = data.rows[0].report_id;
+				$scope.company_id = data.rows[0].company_id;
+				set_company_title();
+				set_category_title();
+				EventBus.prepForBroadcast('reportDataReady','report_id',$scope.report_id);
+			});
+		}
+		
 		function calc_total(data){
 			var total = 0;
 			angular.forEach(data,function(item){
@@ -33,25 +47,26 @@
 			}
 			return 0;
 		};
-		// Generate four random hex digits.
-		function S4() {
-		   return (((1+Math.random())*0x10000)).toString(16).substring(1);
-		}
-		
-		// Generate a pseudo-GUID by concatenating random hexadecimal.
-		function guid() {
-		   return (S4()+S4()+'-'+S4()+'-'+S4()+'-'+S4()+'-'+S4()+S4()+S4());
-		}
 		
 		// var for dialog instance
 		var modalInstance;
-		function setCampaignTitle(){
-			angular.forEach($scope.campaigns,function(item){
-				if ($scope.campaign === item.id ) {
-					$scope.campaign_title = item.name;
+		function set_company_title(){
+			angular.forEach($scope.companies,function(item){
+				if ($scope.company_id === item.id ) {
+					$scope.company_title = item.name;
 					return;
 				}
 			});
+			if ($scope.report_id) {
+				$http.post('index.php?action=change_company',{report_id : $scope.report_id, company_id : $scope.company_id})
+					.success(function(data) { 
+									
+					})
+					.error(function(){
+						alert('server error');
+						console.log(arguments);
+					});
+			}			
 		}
 		// show dialog with create-edit data
 		function show_edit(row) {
@@ -60,7 +75,7 @@
 				$scope.row = row;
 			}
 			else {
-				$scope.row = { id : guid() };
+				$scope.row = { report_id : $scope.report_id, company_id : $scope.company_id };
 				delete $scope.edit;
 			}
 			
@@ -81,11 +96,20 @@
 				}
 			});			
 		}
-		
+		function set_category_title () {
+			// set category name to table sells with report data
+			angular.forEach($scope.categories,function(item){
+				if ($scope.row.category_id === item.id ) {
+					$scope.row.category_title = item.name;
+					return;
+				}
+			});
+		}
 		// save data to server
 		function save(){
 			var edit = false;
 			var index = 0;
+			set_category_title($scope.category_id);
 			for( var i=0;i<$scope.data.length;i++ ) {
 				if ( $scope.data[i].id === $scope.row.id ) {
 					$scope.data[i] = $scope.row;
@@ -94,22 +118,30 @@
 					break;
 				}
 			}
-			// set category name to table sells with report data
-			angular.forEach($scope.categories,function(item){
-				if ($scope.row.category === item.id ) {
-					$scope.row.category_title = item.name;
-					return;
-				}
-			});
-			if (!edit) {
-				$scope.data.push($scope.row);
-			}
-			$scope.row = {};
-			modalInstance.close();
+			$scope.row.company_id = $scope.company_id; 
+			$scope.row.report_id = $scope.report_id;
+			
+			// сохраняем на серваке
+			$http.post('index.php?action=save',$scope.row)
+				.success(function(data) { 
+					$scope.row.id = data.id;
+					$scope.row.report_id = data.report_id;
+					if (!edit) {
+						$scope.data.push($scope.row);
+						$location.url(''+data.report_id);
+					}
+					$scope.row = {};
+					modalInstance.close();
+				})
+				.error(function(){
+					alert('server error');
+					console.log(arguments);
+				});			
 		}
 		
 		$scope.show_edit = show_edit;
-		$scope.setCampaignTitle = setCampaignTitle;
+		$scope.set_company_title = set_company_title;
+		
 		$scope.calc_total = calc_total;
 		var RowDlgCtrl = function($scope, $modalInstance,row,campaigns,categories) {
 			$scope.row = row;

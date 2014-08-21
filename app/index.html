@@ -20,16 +20,34 @@
     <![endif]-->
 
     <!-- Add your site or application content here -->
-    <div class="col-md-12">
-      <div class="header">
-        
-        <h3 class="text-muted">report</h3>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">Wallbro report</a>
+        </div>
+		
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+				<a href="#/" class="btn"><span class="glyphicon glyphicon-plus"></span> Add new report</a>				
+			</li>
+          </ul>
+          
+        </div><!--/.nav-collapse -->
       </div>
-
-      <div class="" data-ng-view></div>
-
     </div>
-
+    <br/><br/>
+    <div class="">
+    <div class="container">
+      <div class="" data-ng-view></div>
+    </div>
+    </div>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <script>

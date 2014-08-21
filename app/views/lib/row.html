@@ -1,11 +1,13 @@
 <div class="modal-body">
 	<h3 ng-show="edit">Edit row</h3>
-	<form role="form">
+	<form role="form" name="cell">
         <div class="form-group">
-          <input type="text" class="form-control" ng-model="row.employee" placeholder="Name of Walbro employee">
+			<input type="text" class="form-control" ng-model="row.employee" placeholder="Name of Walbro employee" name="employee">
+			<div class="text-danger" ng-show="cell.row.employee.$error.required">Required</div>
         </div>
         <div class="form-group">
           <input type="text" class="form-control" ng-model="row.currency" placeholder="Currency of Expense">
+			<div class="text-danger" ng-show="cell.row.currency.$error.required">Required</div>
         </div>
         
         <div class="form-group">
@@ -17,13 +19,13 @@
         </div>
         
         <div class="form-group">
-            <select class="form-control" ng-model="row.category" ng-options="z.id as z.name for z in categories"></select>
+            <select class="form-control" ng-model="row.category_id" ng-options="z.id as z.name for z in categories"></select>
         </div>
         
         <div class="form-group">
             <span ng-bind="(calculate_me(row.value,row.rate) | number:2)"></span>
         </div>
         
-        <button type="submit" class="btn btn-default" ng-click="save(row)">Submit</button>
+        <input type="submit"  class="btn btn-default" ng-click="save(row)" ng-disabled="(!row.category_id || !row.employee || !row.currency || !row.value || !row.rate)" value="Submit"/>
     </form>
 </div>

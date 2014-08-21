@@ -2,12 +2,41 @@
 	/* example from developers - work at once*/
 	'use strict';
 	var app = window.app;
-	app.controllers.controller('UploadCtrl', function($scope, $http, FileUploader) {
-		 var uploader = $scope.uploader = new FileUploader({
-            url: 'upload.php'
+	app.controllers.controller('UploadCtrl', function($scope, $http, FileUploader, EventBus) {
+		$scope.$on('reportDataReady',function(evt,report_id){
+			$scope.report_id 	= report_id;
+		});
+		
+		var uploader = $scope.uploader = new FileUploader({
+            url: 'index.php?action=upload&report_id='+$scope.report_id
         });
-
-        // FILTERS
+		
+		$http.get('index.php?action=get_report_files&report_id='+$scope.report_id).success(function(data) {
+			for(var i=0;i<data.files.length;i++){
+				var item = data.files[i];
+				var name = item.name.split('/');
+				name = name[name.length-1];
+				var dummy = new FileUploader.FileItem(uploader, {
+					lastModifiedDate: new Date(),
+					size: item.size,
+					type: item.type,
+					name: name
+				});
+				dummy.id = item.id;
+				dummy.progress = 100;
+				dummy.isUploaded = true;
+				dummy.isSuccess = true;
+				
+				uploader.queue.push(dummy);
+			};			
+		});
+		function remove(item){
+			$http.get('index.php?action=remove_report_file&id='+item.id).success(function(data) {
+				item.remove();
+			});
+		}
+		$scope.remove = remove;
+		// FILTERS
 
         uploader.filters.push({
             name: 'imageFilter',
@@ -16,7 +45,7 @@
                 return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
             }
         });
-
+	
         // CALLBACKS
 
         uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/, filter, options) {

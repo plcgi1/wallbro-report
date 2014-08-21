@@ -20,7 +20,10 @@
 			templateUrl: 'views/report.html',
 			controller: 'ReportCtrl'
 		}).
-        
+        when('/:report_id', {
+			templateUrl: 'views/report.html',
+			controller: 'ReportCtrl'
+		}).
 		otherwise({
 			redirectTo: '/'
 		});
