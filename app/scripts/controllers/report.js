@@ -2,8 +2,10 @@
 	'use strict';
 	var app = window.app;
 	app.controllers.controller('ReportCtrl', function($scope, $http, $modal,$location,$routeParams,EventBus) {
-		$scope.report_id = $routeParams.report_id;
-				
+		if ($routeParams.report_id || typeof $routeParams.report_id != 'undefined' ) {
+			$scope.report_id = $routeParams.report_id;
+		}
+						
 		// report data array
 		$scope.data = [];
 		// current row for report
@@ -12,20 +14,22 @@
 		$scope.companies = [];
 				
 		// getting data from server about categories
-		$http.get('index.php?action=categories').success(function(data) {
+		$http.get('rest.php?action=categories').success(function(data) {
 			$scope.categories  = data;
 		});
 		
 		// getting data from server about campaign names
-		$http.get('index.php?action=companies').success(function(data) {
+		$http.get('rest.php?action=companies').success(function(data) {
 			$scope.companies = data;
 		});
 		
-		if ( $scope.report_id ) {
-			$http.get('index.php?action=get_report&id='+$scope.report_id).success(function(data) {
+		if ( $scope.report_id  ) {
+			$http.get('rest.php?action=get_report&id='+$scope.report_id).success(function(data) {
+				
 				$scope.data = data.rows;
-				$scope.report_id = data.rows[0].report_id;
-				$scope.company_id = data.rows[0].company_id;
+				$scope.report_id = data.report_id;
+				$scope.company_id = data.company_id;
+				
 				set_company_title();
 				set_category_title();
 				EventBus.prepForBroadcast('reportDataReady','report_id',$scope.report_id);
@@ -47,7 +51,24 @@
 			}
 			return 0;
 		};
-		
+		function remove_row(row){
+			$http.get('rest.php?action=remove_row&id='+row.id)
+					.success(function() {
+						if ($scope.data && $scope.data.length>0) {
+							var new_data = [];
+							for( var i=0;i<$scope.data.length;i++) {
+								if ( $scope.data[i].id != row.id) {
+									new_data.push($scope.data[i]);
+								}
+							}
+							$scope.data = new_data;
+						}
+					})
+					.error(function(){
+						alert('server error');
+						console.log(arguments);
+					});
+		}
 		// var for dialog instance
 		var modalInstance;
 		function set_company_title(){
@@ -57,11 +78,9 @@
 					return;
 				}
 			});
-			if ($scope.report_id) {
-				$http.post('index.php?action=change_company',{report_id : $scope.report_id, company_id : $scope.company_id})
-					.success(function(data) { 
-									
-					})
+			if (angular.isNumber($scope.report_id)) {
+				$http.post('rest.php?action=change_company',{report_id : $scope.report_id, company_id : $scope.company_id})
+					.success(function() {})
 					.error(function(){
 						alert('server error');
 						console.log(arguments);
@@ -122,7 +141,7 @@
 			$scope.row.report_id = $scope.report_id;
 			
 			// сохраняем на серваке
-			$http.post('index.php?action=save',$scope.row)
+			$http.post('rest.php?action=save',$scope.row)
 				.success(function(data) { 
 					$scope.row.id = data.id;
 					$scope.row.report_id = data.report_id;
@@ -141,6 +160,7 @@
 		
 		$scope.show_edit = show_edit;
 		$scope.set_company_title = set_company_title;
+		$scope.remove_row = remove_row;
 		
 		$scope.calc_total = calc_total;
 		var RowDlgCtrl = function($scope, $modalInstance,row,campaigns,categories) {

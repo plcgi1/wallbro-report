@@ -29,7 +29,10 @@
         <td>{{item.rate}}</td>
         <td>{{item.category_title}}</td>
         <td ng-bind="calculate_me(item.value,item.rate) || 0"></td>
-        <td><button type="button" class="btn btn-info" ng-click="show_edit(item)"><span class="glyphicon glyphicon-pencil"></span> edit</button></td>
+        <td>
+          <button type="button" class="btn btn-info col-md-12" ng-click="show_edit(item)"><span class="glyphicon glyphicon-pencil"></span> edit</button>
+          <button type="button" class="btn btn-danger col-md-12" ng-click="remove_row(item)"><span class="glyphicon glyphicon-remove"></span> remove</button>
+        </td>
     </tr>
     <tr><td colspan="7"><span class="pull-rught">Total : {{(calc_total(data))}}</span></td></tr>
   </table>

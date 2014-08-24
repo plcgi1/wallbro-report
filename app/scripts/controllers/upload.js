@@ -2,36 +2,37 @@
 	/* example from developers - work at once*/
 	'use strict';
 	var app = window.app;
-	app.controllers.controller('UploadCtrl', function($scope, $http, FileUploader, EventBus) {
+	app.controllers.controller('UploadCtrl', function($scope, $http, FileUploader) {
 		$scope.$on('reportDataReady',function(evt,report_id){
 			$scope.report_id 	= report_id;
 		});
 		
 		var uploader = $scope.uploader = new FileUploader({
-            url: 'index.php?action=upload&report_id='+$scope.report_id
+            url: 'rest.php?action=upload&report_id='+$scope.report_id
         });
-		
-		$http.get('index.php?action=get_report_files&report_id='+$scope.report_id).success(function(data) {
-			for(var i=0;i<data.files.length;i++){
-				var item = data.files[i];
-				var name = item.name.split('/');
-				name = name[name.length-1];
-				var dummy = new FileUploader.FileItem(uploader, {
-					lastModifiedDate: new Date(),
-					size: item.size,
-					type: item.type,
-					name: name
-				});
-				dummy.id = item.id;
-				dummy.progress = 100;
-				dummy.isUploaded = true;
-				dummy.isSuccess = true;
-				
-				uploader.queue.push(dummy);
-			};			
-		});
+		if ($scope.report_id || typeof $scope.report_id != 'undefined' ) {
+			$http.get('rest.php?action=get_report_files&report_id='+$scope.report_id).success(function(data) {
+				for(var i=0;i<data.files.length;i++){
+					var item = data.files[i];
+					var name = item.name.split('/');
+					name = name[name.length-1];
+					var dummy = new FileUploader.FileItem(uploader, {
+						lastModifiedDate: new Date(),
+						size: item.size,
+						type: item.type,
+						name: name
+					});
+					dummy.id = item.id;
+					dummy.progress = 100;
+					dummy.isUploaded = true;
+					dummy.isSuccess = true;
+					
+					uploader.queue.push(dummy);
+				}
+			});
+		}
 		function remove(item){
-			$http.get('index.php?action=remove_report_file&id='+item.id).success(function(data) {
+			$http.get('rest.php?action=remove_report_file&id='+item.id).success(function() {
 				item.remove();
 			});
 		}

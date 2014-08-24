@@ -269,7 +269,12 @@ module.exports = function (grunt) {
     // concat: {
     //   dist: {}
     // },
-
+    uglify : {
+      options: {
+            report: 'min',
+            mangle: false
+        }
+    },
     imagemin: {
       dist: {
         files: [{
@@ -343,9 +348,10 @@ module.exports = function (grunt) {
             '*.{ico,png,txt}',
             '.htaccess',
             '*.html',
+            '*.php',
             'views/{,*/}*.html',
             'images/{,*/}*.{webp}',
-            'fonts/*'
+            'fonts/*'            
           ]
         }, {
           expand: true,
@@ -353,10 +359,20 @@ module.exports = function (grunt) {
           dest: '<%= yeoman.dist %>/images',
           src: ['generated/*']
         }, {
+          expand: false,
+          cwd: '.',
+          src: [
+            'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/glyphicons-halflings-regular.eot',
+            'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/glyphicons-halflings-regular.svg',
+            'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/glyphicons-halflings-regular.ttf',
+            'bower_components/bootstrap-sass-official/assets/fonts/bootstrap/glyphicons-halflings-regular.woff'
+          ],
+          dest: '<%= yeoman.dist %>/images/'
+        }, {
           expand: true,
           cwd: '.',
-          src: 'app/bower_components/bootstrap-sass-official/assets/fonts/bootstrap/*',
-          dest: '<%= yeoman.dist %>'
+          src: 'lib/{,*/}*.php',
+          dest: '<%= yeoman.dist %>/'
         }]
       },
       styles: {
@@ -442,6 +458,7 @@ module.exports = function (grunt) {
     'test',
     'build'
   ]);
+  
   //grunt.registerTask('jshint', [
   //  'newer:jshint'
   //]);
