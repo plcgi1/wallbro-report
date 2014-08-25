@@ -3,7 +3,7 @@
 require_once('lib/config.php');
 require('lib/AMysql.php');
 
-$possible_url = array("categories", "companies","save","get_report", "change_company", "upload", "get_report_files", "remove_report_file", "remove_row");
+$possible_url = array("reports","categories", "companies","save","get_report", "change_company", "upload", "get_report_files", "remove_report_file", "remove_row");
 
 $value = array("status" => "error","message" => "No such method" );
 $DBH = null;
@@ -53,6 +53,9 @@ if (isset($_GET["action"]) && in_array($_GET["action"], $possible_url)) {
         case "remove_row":
             $value = remove_row($DBH);
             break;
+        case "reports":
+            $value = reports($DBH);
+            break;    
     }
 }
 header("Content-Type: application/json");
@@ -140,13 +143,13 @@ function save($dbh){
     $report = NULL;
     $parent_report = NULL;
         
-    // ïðîâåðèì íàëè÷èå çàïèñè â report
+    // Ã¯Ã°Ã®Ã¢Ã¥Ã°Ã¨Ã¬ Ã­Ã Ã«Ã¨Ã·Ã¨Ã¥ Ã§Ã Ã¯Ã¨Ã±Ã¨ Ã¢ report
     if( isset($param->id) ){
-        // çàïèñè íåò
+        // Ã§Ã Ã¯Ã¨Ã±Ã¨ Ã­Ã¥Ã²
         $sth = $dbh->prepare('SELECT * FROM report WHERE id=?');
         $sth->execute(array($param->id));
         $report = $sth->fetch();
-        // çàïèñè íåò - âîçâðàùàåì status : error, message: 'No such report'
+        // Ã§Ã Ã¯Ã¨Ã±Ã¨ Ã­Ã¥Ã² - Ã¢Ã®Ã§Ã¢Ã°Ã Ã¹Ã Ã¥Ã¬ status : error, message: 'No such report'
         if( !isset($report) ) {
             return array( 'status' => 'error', 'message' => 'No such item in report' );
         }
@@ -154,11 +157,11 @@ function save($dbh){
         $report_id = $report['id'];
     }
     if( isset($report_id) ) {
-        // çàïèñè íåò
+        // Ã§Ã Ã¯Ã¨Ã±Ã¨ Ã­Ã¥Ã²
         $sth = $dbh->prepare('SELECT * FROM reports WHERE id=?');
         $sth->execute(array($param->id));
         $report = $sth->fetch();
-        // çàïèñè íåò - âîçâðàùàåì status : error, message: 'No such report'
+        // Ã§Ã Ã¯Ã¨Ã±Ã¨ Ã­Ã¥Ã² - Ã¢Ã®Ã§Ã¢Ã°Ã Ã¹Ã Ã¥Ã¬ status : error, message: 'No such report'
         if( !isset($report) ) {
             return array( 'status' => 'error', 'message' => 'No such report in reports' );
         }
@@ -243,7 +246,7 @@ function upload($dbh){
         move_uploaded_file( $temp_path, $file );
         $res['answer'] = 'ok';
     
-        // äîáàâèì çàïèñü â ÁÄ ñ èíôîé î ôàéëå
+        // Ã¤Ã®Ã¡Ã Ã¢Ã¨Ã¬ Ã§Ã Ã¯Ã¨Ã±Ã¼ Ã¢ ÃÃ„ Ã± Ã¨Ã­Ã´Ã®Ã© Ã® Ã´Ã Ã©Ã«Ã¥
         //$stmt = $dbh->prepare(
         //    "INSERT INTO report_files(report_id,name,type,size,created) VALUES(:report_id,:name,:type,:size,unix_timestamp())"
         //);
@@ -278,7 +281,7 @@ function get_report_files($dbh){
     while($row = $sth->fetch()) {        
         array_push($files,$row);
     }
-    // çàïèñè íåò - âîçâðàùàåì status : error, message: 'No such report'
+    // Ã§Ã Ã¯Ã¨Ã±Ã¨ Ã­Ã¥Ã² - Ã¢Ã®Ã§Ã¢Ã°Ã Ã¹Ã Ã¥Ã¬ status : error, message: 'No such report'
     if( !isset($files) ) {
         return array( 'status' => 'error', 'message' => 'No such item in report' );
     }
@@ -308,7 +311,40 @@ function remove_row($dbh){
     
     $where = 'id = ?';
     $success = $dbh->delete('report', $where, array ($id));
-error_log($id);
+
     return array( 'status' => 'ok' );
+}
+
+function reports($dbh) {
+	$page   = $_GET['page'];
+	$limit  = 30;
+		
+	$offset = $limit * ($page-1);
+	if ( $offset<0) {
+		$offset = '0';
+	}
+	
+	$sth = $dbh->prepare('SELECT SQL_CALC_FOUND_ROWS * FROM reports ORDER BY created DESC LIMIT ? OFFSET ?');
+    $sth->execute(array($limit,$offet));
+    
+	$count = $dbh->exec("SELECT FOUND_ROWS()");	
+	$total_pages = $count->{cnt} / $limit;
+	$d = $count->{cnt} % $limit;
+	if ($d) {
+		$total_pages++;
+	}
+
+    $data = array();
+    while($row = $sth->fetch()) {        
+        array_push($data,$row);
+    }
+    return array( 
+        'status' => 'ok', 
+        'json' => array(
+            'total' => $count, 
+            'data' => $data, 
+            'pages' => $total_pages
+        )
+    );
 }
 ?>
