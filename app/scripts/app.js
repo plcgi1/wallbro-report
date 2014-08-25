@@ -17,8 +17,8 @@
 	window.app.config(function($routeProvider, $httpProvider) {
 		$routeProvider
 		.when('/', {
-			templateUrl: 'views/report.html',
-			controller: 'ReportCtrl'
+			templateUrl: 'views/reports.html',
+			controller: 'ReportsCtrl'
 		}).
         when('/:report_id', {
 			templateUrl: 'views/report.html',

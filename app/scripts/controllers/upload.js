@@ -10,7 +10,7 @@
 		var uploader = $scope.uploader = new FileUploader({
             url: 'rest.php?action=upload&report_id='+$scope.report_id
         });
-		if ($scope.report_id || typeof $scope.report_id != 'undefined' ) {
+		if ($scope.report_id || typeof $scope.report_id !== 'undefined' ) {
 			$http.get('rest.php?action=get_report_files&report_id='+$scope.report_id).success(function(data) {
 				for(var i=0;i<data.files.length;i++){
 					var item = data.files[i];

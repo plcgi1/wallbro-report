@@ -2,10 +2,12 @@
 	'use strict';
 	var app = window.app;
 	app.controllers.controller('ReportCtrl', function($scope, $http, $modal,$location,$routeParams,EventBus) {
-		if ($routeParams.report_id || typeof $routeParams.report_id != 'undefined' ) {
+		if ($routeParams.report_id || typeof $routeParams.report_id !== 'undefined' ) {
 			$scope.report_id = $routeParams.report_id;
 		}
-						
+		if ($scope.report_id === 'new') {
+			delete $scope.report_id;
+		}
 		// report data array
 		$scope.data = [];
 		// current row for report
@@ -23,7 +25,7 @@
 			$scope.companies = data;
 		});
 		
-		if ( $scope.report_id  ) {
+		if ( $scope.report_id || typeof $scope.report_id !== 'undefined' ) {
 			$http.get('rest.php?action=get_report&id='+$scope.report_id).success(function(data) {
 				
 				$scope.data = data.rows;
@@ -36,6 +38,9 @@
 			});
 		}
 		
+		function error_handler(){
+			window.alert('Server error');
+		}
 		function calc_total(data){
 			var total = 0;
 			angular.forEach(data,function(item){
@@ -57,17 +62,14 @@
 						if ($scope.data && $scope.data.length>0) {
 							var new_data = [];
 							for( var i=0;i<$scope.data.length;i++) {
-								if ( $scope.data[i].id != row.id) {
+								if ( $scope.data[i].id !== row.id) {
 									new_data.push($scope.data[i]);
 								}
 							}
 							$scope.data = new_data;
 						}
 					})
-					.error(function(){
-						alert('server error');
-						console.log(arguments);
-					});
+					.error(error_handler);
 		}
 		// var for dialog instance
 		var modalInstance;
@@ -78,13 +80,10 @@
 					return;
 				}
 			});
-			if (angular.isNumber($scope.report_id)) {
+			if ( $scope.report_id || typeof $scope.report_id !== 'undefined' ) {
 				$http.post('rest.php?action=change_company',{report_id : $scope.report_id, company_id : $scope.company_id})
 					.success(function() {})
-					.error(function(){
-						alert('server error');
-						console.log(arguments);
-					});
+					.error(error_handler);
 			}			
 		}
 		// show dialog with create-edit data
@@ -152,10 +151,7 @@
 					$scope.row = {};
 					modalInstance.close();
 				})
-				.error(function(){
-					alert('server error');
-					console.log(arguments);
-				});			
+				.error(error_handler);			
 		}
 		
 		$scope.show_edit = show_edit;

@@ -92,6 +92,7 @@ function change_company($dbh){
     $param = json_decode($raw);
     $report_id = $param->report_id;
     $company_id = $param->company_id;
+    $updated = time();
     $res = array();
     if( isset($report_id) && isset($company_id)){
         /* pdo statement */
@@ -100,8 +101,9 @@ function change_company($dbh){
         
         $data = array(
             'company_id'    => $company_id,
-            'updated'       => 'UNIX_TIMESTAMP()'
+            'updated'       => $updated
         );
+        
         $dbh->update('reports', $data, 'id = ?', array($report_id));
         $res = array( 'status' => "ok", 'message' => 'company updated', 'company_id' => $company_id, 'report_id' => $report_id );
     }
@@ -142,10 +144,8 @@ function save($dbh){
     $report_id = $param->report_id;
     $report = NULL;
     $parent_report = NULL;
-        
-    // ïðîâåðèì íàëè÷èå çàïèñè â report
+    $updated = time();
     if( isset($param->id) ){
-        // çàïèñè íåò
         $sth = $dbh->prepare('SELECT * FROM report WHERE id=?');
         $sth->execute(array($param->id));
         $report = $sth->fetch();
@@ -154,14 +154,14 @@ function save($dbh){
             return array( 'status' => 'error', 'message' => 'No such item in report' );
         }
         $id = $param->id;
-        $report_id = $report['id'];
+        $report_id = $report['report_id'];
     }
     if( isset($report_id) ) {
         // çàïèñè íåò
         $sth = $dbh->prepare('SELECT * FROM reports WHERE id=?');
         $sth->execute(array($param->id));
         $report = $sth->fetch();
-        // çàïèñè íåò - âîçâðàùàåì status : error, message: 'No such report'
+
         if( !isset($report) ) {
             return array( 'status' => 'error', 'message' => 'No such report in reports' );
         }
@@ -174,9 +174,10 @@ function save($dbh){
         //$stmt = $dbh->prepare("UPDATE report SET employee=?,currency=?,value=?,rate=?,category_id=?,updated=unix_timestamp() WHERE id=?");
         //$stmt->execute(array($param->employee, $param->currency,$param->value,$param->rate,$param->category_id,$id));
         
-        $dbh->update('reports', array('updated'=>'UNIX_TIMESTAMP()'), 'id = ?', array($report_id));
+        $dbh->update('reports', array('updated' => $updated), 'id = ?', array( $report_id ));
+        
         $data = array (
-            'updated'       => 'UNIX_TIMESTAMP()',
+            'updated'       => $updated,
             'employee'      => $param->employee,
             'currency'      => $param->currency,
             'value'         => $param->value,
@@ -196,8 +197,8 @@ function save($dbh){
             //$report_id = $dbh->lastInsertId();
             $data = array (
                 'company_id' => $param->company_id,
-                'created'     => 'UNIX_TIMESTAMP()',
-                'updated'     => 'UNIX_TIMESTAMP()'
+                'created'     => $updated,
+                'updated'     => $updated
             );
             $report_id = $dbh->insert('reports', $data);
         }
@@ -223,8 +224,8 @@ function save($dbh){
             'rate'          => $param->rate,
             'category_id'   => $param->category_id,
             'report_id'     => $report_id,
-            'created'       => 'UNIX_TIMESTAMP()',
-            'updated'       => 'UNIX_TIMESTAMP()'
+            'created'       => $updated,
+            'updated'       => $updated
         );
         $id = $dbh->insert('report', $data);
     }
@@ -259,13 +260,13 @@ function upload($dbh){
         //    )
         //);
         //$res['id'] = $dbh->lastInsertId();
-        
+        $dbh->update('reports', array('updated'=>time()), 'id = ?', array($report_id));
         $data = array (
             'name'      => $file,
             'type'      => $_FILES[ 'file' ][ 'type' ],
             'size'      => $_FILES[ 'file' ][ 'size' ],
             'report_id' => $report_id,
-            'created'   => 'UNIX_TIMESTAMP()'
+            'created'   => $updated = time()
         );
         $res['id'] = $dbh->insert('report_files', $data);
         
@@ -302,49 +303,59 @@ function remove_report_file($dbh){
     
     $where = 'id = ?';
     $success = $dbh->delete('report_files', $where, array ($id));
-
+    
+    $dbh->update('reports', array('updated'=>time()), 'id = ?', array($file['report_id']));
+    
     return array( 'status' => 'ok' );
 }
 
 function remove_row($dbh){
     $id = $_GET['id'];
+    $stmt = $dbh->prepare('SELECT * FROM report WHERE id=?');
+    $stmt->execute(array($id));
+    $report_file = $stmt->fetch();
+    
+    $dbh->update('reports', array('updated'=>time()), 'id = ?', array($report_file['report_id']));
     
     $where = 'id = ?';
     $success = $dbh->delete('report', $where, array ($id));
-
+    
     return array( 'status' => 'ok' );
 }
 
 function reports($dbh) {
 	$page   = $_GET['page'];
-	$limit  = 30;
+    if( !isset($page) ) {
+        $page = 1;
+    }
+	$limit  = 3;
 		
 	$offset = $limit * ($page-1);
-	if ( $offset<0) {
-		$offset = '0';
+	if ( $offset<0 || !isset($offset) ) {
+		$offset = 0;
 	}
-	
-	$sth = $dbh->prepare('SELECT SQL_CALC_FOUND_ROWS * FROM reports ORDER BY created DESC LIMIT ? OFFSET ?');
-    $sth->execute(array($limit,$offet));
-    
-	$count = $dbh->exec("SELECT FOUND_ROWS()");	
-	$total_pages = $count->{cnt} / $limit;
-	$d = $count->{cnt} % $limit;
-	if ($d) {
-		$total_pages++;
-	}
-
-    $data = array();
+	$data = array();
+	$sth = $dbh->prepare('SELECT SQL_CALC_FOUND_ROWS id,from_unixtime(created) AS created,from_unixtime(updated) AS updated
+                         FROM reports ORDER BY created DESC LIMIT ? OFFSET ?');
+    $sth->execute(array( $limit, $offset));
     while($row = $sth->fetch()) {        
         array_push($data,$row);
     }
+    
+	$count = $dbh->query("SELECT FOUND_ROWS() AS cnt");
+        
+    $count = $count->fetch();
+    $count = $count['cnt'];        
+	$total_pages = $count / $limit;
+	$d = $count % $limit;
+	if ($d) {
+		$total_pages++;
+	}    
     return array( 
         'status' => 'ok', 
-        'json' => array(
-            'total' => $count, 
-            'data' => $data, 
-            'pages' => $total_pages
-        )
+        'total' => $count, 
+        'data' => $data, 
+        'pages' => $total_pages
     );
 }
 ?>
