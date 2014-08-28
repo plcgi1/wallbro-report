@@ -153,7 +153,10 @@
 				})
 				.error(error_handler);			
 		}
-		
+		function cancel(){
+			modalInstance.close();
+		}
+		$scope.cancel = cancel;
 		$scope.show_edit = show_edit;
 		$scope.set_company_title = set_company_title;
 		$scope.remove_row = remove_row;

@@ -25,7 +25,11 @@
         <div class="form-group">
             <span ng-bind="(calculate_me(row.value,row.rate) | number:2)"></span>
         </div>
+		
         
-        <input type="submit"  class="btn btn-default" ng-click="save(row)" ng-disabled="(!row.category_id || !row.employee || !row.currency || !row.value || !row.rate)" value="Submit"/>
     </form>
+	
+	<input type="reset"  class="btn btn-default" ng-click="cancel()" value="Cancel"/>
+    <input type="submit"  class="btn btn-success" ng-click="save(row)" ng-disabled="(!row.category_id || !row.employee || !row.currency || !row.value || !row.rate)" value="Submit"/>
+	
 </div>

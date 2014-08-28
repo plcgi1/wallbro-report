@@ -261,6 +261,7 @@ function upload($dbh){
         //);
         //$res['id'] = $dbh->lastInsertId();
         $dbh->update('reports', array('updated'=>time()), 'id = ?', array($report_id));
+
         $data = array (
             'name'      => $file,
             'type'      => $_FILES[ 'file' ][ 'type' ],
@@ -269,7 +270,8 @@ function upload($dbh){
             'created'   => $updated = time()
         );
         $res['id'] = $dbh->insert('report_files', $data);
-        
+        $res['path'] = '/files/' . $report_id . '/' . basename($file);
+        $res['name'] = basename($file);
     }
     return $res;
 }
@@ -279,7 +281,9 @@ function get_report_files($dbh){
     $sth = $dbh->prepare('SELECT * FROM report_files WHERE report_id=?');
     $sth->execute(array($report_id));
     $files = array();
-    while($row = $sth->fetch()) {        
+    while($row = $sth->fetch()) {
+        $row['path'] = '/files/' . $report_id . '/'. basename($row['name']);
+        $row['name'] = basename($row['name']);
         array_push($files,$row);
     }
     // çàïèñè íåò - âîçâðàùàåì status : error, message: 'No such report'

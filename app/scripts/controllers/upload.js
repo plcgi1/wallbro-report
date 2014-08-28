@@ -3,6 +3,7 @@
 	'use strict';
 	var app = window.app;
 	app.controllers.controller('UploadCtrl', function($scope, $http, FileUploader) {
+		
 		$scope.$on('reportDataReady',function(evt,report_id){
 			$scope.report_id 	= report_id;
 		});
@@ -26,7 +27,8 @@
 					dummy.progress = 100;
 					dummy.isUploaded = true;
 					dummy.isSuccess = true;
-					
+					dummy.path = item.path;
+					dummy.name = item.name;
 					uploader.queue.push(dummy);
 				}
 			});
@@ -68,6 +70,8 @@
             console.info('onProgressAll', progress);
         };
         uploader.onSuccessItem = function(fileItem, response, status, headers) {
+			fileItem.path = response.path;
+			fileItem.name = response.name;
             console.info('onSuccessItem', fileItem, response, status, headers);
         };
 		uploader.onErrorItem = function(fileItem, response, status, headers) {

@@ -10,11 +10,11 @@
  */
 (function() {
 	window.app = angular.module('report',
-		['ngRoute', 'report.controllers','ui.bootstrap','plcgi.eventbus','angularFileUpload']
+		['ngRoute', 'report.controllers','ui.bootstrap','plcgi.eventbus','angularFileUpload','ngResource']
 	);
-	window.app.controllers = angular.module('report.controllers', ['ui.bootstrap','plcgi.eventbus','angularFileUpload']);
-
-	window.app.config(function($routeProvider, $httpProvider) {
+	window.app.controllers = angular.module('report.controllers', ['ui.bootstrap','plcgi.eventbus','angularFileUpload','ngResource']);
+    
+    window.app.config(function($routeProvider, $httpProvider) {
 		$routeProvider
 		.when('/', {
 			templateUrl: 'views/reports.html',

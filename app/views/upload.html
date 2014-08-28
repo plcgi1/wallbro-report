@@ -19,7 +19,7 @@
         <tbody>
             <tr ng-repeat="item in uploader.queue">
                 <td>
-                    <strong>{{ item.file.name }}</strong>
+                    <strong><a href="{{item.path}}" target="_blank">{{item.name}}</a></strong>
                     <!-- Image preview -->
                     <!--auto height-->
                     <!--<div ng-thumb="{ file: item.file, width: 100 }"></div>-->
